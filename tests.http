@@ -1,0 +1,28 @@
+###
+POST http://localhost:3000/api/auth/register HTTP/1.1
+content-type: application/json
+
+{
+    "username": "rastadev2",
+    "password": "rastadev"
+}
+
+###
+POST http://localhost:3000/api/auth/login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "rastadev",
+    "password": "rastadev"
+}
+
+###
+POST http://localhost:3000/api/conferences HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJhc3RhZGV2IiwiaWF0IjoxNTUwMTUwNTMwLCJleHAiOjE1NTAxNTQxMzB9.nkjPe4ZG4SBNaq5OzD9eLYimZT0e6eH3dTmCm8VA2Mg
+
+{
+    "name": "Conference B",
+    "description": "Best conference ever",
+    "status": true
+}

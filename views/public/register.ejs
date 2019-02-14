@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-12">
+                <h1>Register</h1>
+            </div>
+
+            <div id="alertRow" class="col-sm-12" style="display: none;">
+                <div id="alertContent" class="alert alert-danger" role="alert">
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+
+                <!--Form-->
+                <form id="registerForm">
+
+                    <!--Username-->
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" aria-describedby="usernameHelp"
+                            placeholder="Enter username">
+                        <small id="usernameHelp" class="form-text text-muted">We'll never share your username with
+                            anyone
+                            else.</small>
+                    </div>
+
+                    <!--Password-->
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Password">
+                    </div>
+
+                    <!--Submit-->
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+        $("#registerForm").submit((event) => {
+            event.preventDefault();
+
+            payload = {
+                username: $('#username').val(),
+                password: $('#password').val()
+            }
+
+            axios.post('/api/auth/register', payload).then((response) => {
+                if (response.data.success) location.href = '/'
+                $('#alertContent').text(response.data.msg)
+                $('#alertRow').css({
+                    display: "block"
+                })
+            }).catch(err => {
+                console.log(err)
+            })
+        });
+    </script>
+</body>
+
+</html>

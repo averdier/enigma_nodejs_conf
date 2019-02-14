@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <style>
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/javascripts/main.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/conferences">Conferences</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Details</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <div id="alertRow" class="col-sm-12" style="display: none;">
+                <div id="alertContent" class="alert alert-danger" role="alert">
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-lg-6">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h3 id="conferenceName"></h3>
+                        <p id="conferenceDescription"></p>
+                        <p id="conferenceStatus"></p>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <h3>Users</h3>
+                        <ul class="list-group" id="userList">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-lg-6" style="margin-top: 12px; display: none;" id="chatBlock">
+                <h3>Chat</h3>
+                <ul id="messages"></ul>
+                <form id="chartForm" action="">
+                    <input id="m" autocomplete="off" /><button>Send</button>
+                </form>
+            </div>
+
+            <div class="col-sm-12" style="margin-top: 12px;">
+                <h3>Private messages</h3>
+                <!--Form-->
+                <form id="messageForm">
+
+                    <!--Description-->
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea class="form-control" id="message" rows="3"></textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="sendPrivateMessage()">Send</button>
+                </form>
+            </div>
+
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+
+        <script>
+            var conferenceId = '<%= id %>'
+
+            function renderConference(conference) {
+                $('#conferenceName').text(conference.name)
+                $('#conferenceDescription').text(conference.description)
+                if (conference.status) {
+                    $('#conferenceStatus').text('Open')
+                    $('#chatBlock').css({
+                        display: "block"
+                    })
+                } else {
+                    $('#conferenceStatus').text('Not open')
+                }
+                conference.users.forEach(element => {
+                    $('#userList').append(`<li class="list-group-item">${element}</li>`)
+                });
+            }
+
+            function renderError(error) {
+                $('#alertContent').text(error)
+                $('#alertRow').css({
+                    display: "block"
+                })
+            }
+
+            function initChat(conference) {
+                var socket = io.connect(window.location.origin, {
+                    query: 'token=' + token.encoded
+                });
+                $('#chartForm').submit(function (e) {
+                    e.preventDefault();
+                    payload = {
+                        user: token.unencoded.username,
+                        content: $('#m').val()
+                    }
+                    socket.emit('/chat', payload);
+                    $('#m').val('');
+                    return false;
+                });
+
+                socket.on('/chat', function (msg) {
+                    $('#messages').append(`<li><strong>${msg.user}</strong><br>${msg.content}</li>`)
+                });
+            }
+
+            function sendPrivateMessage () {
+                axios.post(`/api/conferences/${conferenceId}/message`, {message: $('#message').val()}).then(response => {
+                    if (response.data.success) {
+                        $('#message').val('')
+                    }
+                    else {
+                        renderError(response.data.msg)
+                    }
+                }).catch(err => {
+                    if (err.response) {
+                        if (err.response.status === 401) location.href='/login'
+                    }
+                    renderError(err)
+                })
+            }
+
+            $(() => {
+                axios.get(`/api/conferences/${conferenceId}`).then((response) => {
+                    if (response.data.success) {
+                        renderConference(response.data.conference)
+
+                        if (response.data.conference.status) {
+                            initChat(response.data.conference);
+                        }
+                    } else {
+                        renderError(response.data.msg)
+                    }
+                }).catch(err => {
+                    if (err.response) {
+                        if (err.response.status === 401) location.href = '/login'
+                        if (err.response.status === 404) location.href = '/conferences'
+                    } else {
+                        renderError(err)
+                    }
+                })
+            })
+        </script>
+</body>
+
+</html>
