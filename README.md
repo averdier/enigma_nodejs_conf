@@ -22,6 +22,12 @@ Le chat est sécurisé avec le token jwt `/routes/index` et `/views/public/confe
 
 Les messages sécurisés sont uniquement visibles dans la partie administration
 
+L'utilisateur administrateur est : `rastaadmin:rastaadmin`
+
+L'authentification est valide pendant 1h
+
+La route de déconnexion est `/logout` (à taper à la main)
+
 ## Installation
 
 Cloner le projet :
