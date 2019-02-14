@@ -151,7 +151,7 @@
                         <!--Open-->
                         <div class="form-group">
                             <label for="addOpen">Open</label>
-                            <select class="form-control" id="open">
+                            <select class="form-control" id="addOpen">
                                 <option>Yes</option>
                                 <option>No</option>
                             </select>
@@ -202,7 +202,7 @@
             payload = {
                 name: $('#addName').val(),
                 description: $('#addDescription').val(),
-                status: $("select#addOpen option:checked").val() == 0
+                status: $("#addOpen").val() === 'Yes'
             }
             axios.post('/api/conferences', payload).then(response => {
                 if (response.data.success) {
